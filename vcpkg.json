@@ -1,5 +1,5 @@
 {
-  "name": "parallel-lab",
+  "name": "parallel-cpu-lab",
   "version-string": "1.0.0",
   "dependencies": [
     "benchmark",
