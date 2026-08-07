@@ -26,34 +26,47 @@ namespace {
     }
 } // namespace
 
-TEST(ParallelSum, HandlesSingleThread) {
+TEST(ParallelSumLocal, HandlesSingleThread) {
     const auto arr = make_random_array(N, 2026);
 
-    EXPECT_EQ(sum_parallel(arr, 1), sum_sequential(arr));
+    EXPECT_EQ(sum_parallel_local(arr, 1), sum_sequential(arr));
 }
 
-TEST(ParallelSum, HandlesMoreThreadsThanElements) {
+TEST(ParallelSumLocal, HandlesMoreThreadsThanElements) {
 
     std::size_t size = N / 100;
     const auto arr = make_random_array(size, 2027);
 
-    EXPECT_EQ(sum_parallel(arr, size + 5), sum_sequential(arr));
+    EXPECT_EQ(sum_parallel_local(arr, size + 5), sum_sequential(arr));
 }
 
-TEST(ParallelSum, HandlesEmptyArray) {
+TEST(ParallelSumLocal, HandlesEmptyArray) {
     const std::vector<i32> arr{};
 
-    EXPECT_EQ(sum_parallel(arr, 5), sum_sequential(arr));
+    EXPECT_EQ(sum_parallel_local(arr, 5), sum_sequential(arr));
 }
 
-TEST(ParallelSum, TenThreads) {
+TEST(ParallelSumLocal, TenThreads) {
     const auto arr = make_random_array(N, 2028);
 
-    EXPECT_EQ(sum_parallel(arr, 10), sum_sequential(arr));
+    EXPECT_EQ(sum_parallel_local(arr, 10), sum_sequential(arr));
 }
 
-TEST(ParallelSum, ZeroThreads) {
+TEST(ParallelSumLocal, ZeroThreads) {
     const auto arr = make_random_array(N / 100, 2029);
 
-    EXPECT_THROW(sum_parallel(arr, 0), std::invalid_argument);
+    EXPECT_THROW(sum_parallel_local(arr, 0), std::invalid_argument);
+}
+
+TEST(ParallelSumMutex, TenThreads) {
+    const auto arr = make_random_array(N, 2030);
+
+    EXPECT_EQ(sum_parallel_mutex(arr, 10), sum_sequential(arr));
+}
+
+
+TEST(ParallelSumAtmoic, TenThreads) {
+    const auto arr = make_random_array(N, 2031);
+
+    EXPECT_EQ(sum_parallel_atomic(arr, 10), sum_sequential(arr));
 }

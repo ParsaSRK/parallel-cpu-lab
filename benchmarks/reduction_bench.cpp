@@ -43,23 +43,65 @@ void BM_SequentialSum(benchmark::State& state) {
     );
 }
 
-void BM_ParallelSum(benchmark::State& state) {
+void BM_ParallelSumLocal(benchmark::State& state) {
     const auto n = static_cast<std::size_t>(state.range(0));
     const auto t = static_cast<std::size_t>(state.range(1));
     
     const auto arr = make_random_array(n, 2026);
 
     for(auto _ : state) {
-        i64 result = sum_parallel(arr, t);
+        i64 result = sum_parallel_local(arr, t);
         benchmark::DoNotOptimize(result);
     }
     state.SetItemsProcessed(
         state.iterations() *
-        static_cast<std::int64_t>(n)
+        static_cast<i64>(n)
     );
     state.SetBytesProcessed(
         state.iterations() *
-        static_cast<std::int64_t>(n * sizeof(i32))
+        static_cast<i64>(n * sizeof(i32))
+    );
+}
+
+void BM_ParallelSumMutex(benchmark::State& state) {
+    const auto n = static_cast<std::size_t>(state.range(0));
+    const auto t = static_cast<std::size_t>(state.range(1));
+
+    const auto arr = make_random_array(n, 2027);
+
+    for(auto _ : state) {
+        i64 result = sum_parallel_mutex(arr, t);
+        benchmark::DoNotOptimize(result);
+    }
+
+    state.SetItemsProcessed(
+        state.iterations() *
+        static_cast<i64>(n)
+    );
+    state.SetBytesProcessed(
+        state.iterations() *
+        static_cast<i64>(n * sizeof(i32))
+    );
+}
+
+void BM_ParallelSumAtomic(benchmark::State& state) {
+    const auto n = static_cast<std::size_t>(state.range(0));
+    const auto t = static_cast<std::size_t>(state.range(1));
+
+    const auto arr = make_random_array(n, 2027);
+
+    for(auto _ : state) {
+        i64 result = sum_parallel_atomic(arr, t);
+        benchmark::DoNotOptimize(result);
+    }
+
+    state.SetItemsProcessed(
+        state.iterations() *
+        static_cast<i64>(n)
+    );
+    state.SetBytesProcessed(
+        state.iterations() *
+        static_cast<i64>(n * sizeof(i32))
     );
 }
 
@@ -69,8 +111,20 @@ BENCHMARK(BM_SequentialSum)
     ->Unit(benchmark::kMillisecond)
     ->UseRealTime();
 
-BENCHMARK(BM_ParallelSum)
-    ->ArgsProduct({{10'000'000}, {1, 2, 4, 8, 16, 20, 22, 24, 32}})
+BENCHMARK(BM_ParallelSumLocal)
+    ->ArgsProduct({{10'000'000}, {1, 2, 8, 16, 24, 32}})
+    ->ArgNames({"size", "threads"})
+    ->Unit(benchmark::kMillisecond)
+    ->UseRealTime();
+
+BENCHMARK(BM_ParallelSumMutex)
+    ->ArgsProduct({{10'000'000}, {1, 2, 8, 16, 24, 32}})
+    ->ArgNames({"size", "threads"})
+    ->Unit(benchmark::kMillisecond)
+    ->UseRealTime();
+
+BENCHMARK(BM_ParallelSumAtomic)
+    ->ArgsProduct({{10'000'000}, {1, 2, 8, 16, 24, 32}})
     ->ArgNames({"size", "threads"})
     ->Unit(benchmark::kMillisecond)
     ->UseRealTime();
